@@ -1,0 +1,186 @@
+### PawPrint API – request mẫu (VS Code REST Client / JetBrains HTTP Client)
+### Dữ liệu mẫu: chạy `npm run db:seed` – mật khẩu chung: Pawprint@123
+###   admin@pawprint.dev (ADMIN) · mod@pawprint.dev (ADMIN)
+###   minh@pawprint.dev (Cloud+, Mochi + Bơ) · lan@pawprint.dev (FREE, Miu)
+###   locked@pawprint.dev (LOCKED) · newbie@pawprint.dev (chưa có pet)
+@base = http://localhost:3000/api/v1
+@token = paste-access-token
+@adminToken = paste-admin-access-token
+# Pet mẫu: Mochi (của minh). Bơ = ...c2, Miu (của lan) = ...c3
+@petId = 5eed0000-0000-4000-8000-0000000000c1
+
+### Health
+GET {{base}}/health
+
+### Đăng ký
+POST {{base}}/auth/register
+Content-Type: application/json
+
+{ "email": "owner@pawprint.app", "password": "Paw12345", "displayName": "Minh", "timeZone": "Asia/Ho_Chi_Minh" }
+
+### Đăng nhập (user mẫu)
+POST {{base}}/auth/login
+Content-Type: application/json
+
+{ "email": "minh@pawprint.dev", "password": "Pawprint@123" }
+
+### Đăng nhập ADMIN
+POST {{base}}/auth/login
+Content-Type: application/json
+
+{ "email": "admin@pawprint.dev", "password": "Pawprint@123" }
+
+### Đăng nhập tài khoản bị khoá -> 403
+POST {{base}}/auth/login
+Content-Type: application/json
+
+{ "email": "locked@pawprint.dev", "password": "Pawprint@123" }
+
+### Refresh token (rotation)
+POST {{base}}/auth/refresh
+Content-Type: application/json
+
+{ "refreshToken": "paste-refresh-token" }
+
+### Quên mật khẩu
+POST {{base}}/auth/forgot-password
+Content-Type: application/json
+
+{ "email": "owner@pawprint.app" }
+
+### Hồ sơ của tôi
+GET {{base}}/users/me
+Authorization: Bearer {{token}}
+
+### Chọn pet hiện hành
+PATCH {{base}}/users/me
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "currentPetId": "{{petId}}" }
+
+### Tạo pet
+POST {{base}}/pets
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "name": "Mochi", "species": "CAT", "breed": "British Shorthair", "sex": "FEMALE",
+  "birthDate": "2024-03-01", "adoptedAt": "2024-05-10", "weightKg": 3.2 }
+
+### Danh sách pet
+GET {{base}}/pets
+Authorization: Bearer {{token}}
+
+### Sửa pet (optimistic locking với version)
+PATCH {{base}}/pets/{{petId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "note": "Thích ngủ trên bàn phím", "version": 1 }
+
+### Together Days
+GET {{base}}/pets/{{petId}}/together-days
+Authorization: Bearer {{token}}
+
+### Xoá pet (bắt buộc confirm)
+DELETE {{base}}/pets/{{petId}}?confirm=true
+Authorization: Bearer {{token}}
+
+### ---- Upload ảnh moment: B1 xin chữ ký
+POST {{base}}/media/upload-url
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "purpose": "MOMENT" }
+
+### B2: client upload multipart lên `uploadUrl` (Cloudinary) với file + api_key + signature + params
+### B3: xác nhận
+POST {{base}}/media/confirm
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "publicId": "pawprint/u_<userId>/moments/<uuid>" }
+
+### B4: tạo moment
+POST {{base}}/pets/{{petId}}/moments
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "caption": "Ngày đầu về nhà 🏡", "occurredAt": "2024-05-10T09:00:00+07:00", "mediaIds": ["paste-media-id"] }
+
+### Danh sách moments (cursor)
+GET {{base}}/pets/{{petId}}/moments?limit=20
+Authorization: Bearer {{token}}
+
+### Ghi cân nặng
+POST {{base}}/pets/{{petId}}/care-records
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "type": "WEIGHT", "valueDecimal": 3.45 }
+
+### Ghi khám thú y
+POST {{base}}/pets/{{petId}}/care-records
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "type": "VET_VISIT", "title": "Tiêm phòng dại", "note": "Hẹn tái khám sau 1 năm" }
+
+### Lịch sử chăm sóc (lọc)
+GET {{base}}/pets/{{petId}}/care-records?type=WEIGHT&from=2026-01-01&to=2026-12-31
+Authorization: Bearer {{token}}
+
+### Biến động cân nặng
+GET {{base}}/pets/{{petId}}/weights
+Authorization: Bearer {{token}}
+
+### Timeline 1 pet
+GET {{base}}/pets/{{petId}}/timeline?limit=20&kinds=MOMENT,MILESTONE,CARE
+Authorization: Bearer {{token}}
+
+### Timeline tổng hợp nhiều pet
+GET {{base}}/timeline?limit=20
+Authorization: Bearer {{token}}
+
+### Thông báo
+GET {{base}}/notifications
+Authorization: Bearer {{token}}
+
+### Gói & quota
+GET {{base}}/subscriptions/me
+Authorization: Bearer {{token}}
+
+### =============================== ADMIN (cần token của admin@pawprint.dev)
+### Số liệu tổng quan
+GET {{base}}/admin/stats
+Authorization: Bearer {{adminToken}}
+
+### Danh sách người dùng (lọc/tìm kiếm)
+GET {{base}}/admin/users?limit=20&search=pawprint.dev
+Authorization: Bearer {{adminToken}}
+
+### Chi tiết người dùng (minh)
+GET {{base}}/admin/users/5eed0000-0000-4000-8000-0000000000b1
+Authorization: Bearer {{adminToken}}
+
+### Khoá tài khoản lan (thu hồi mọi phiên đăng nhập)
+PATCH {{base}}/admin/users/5eed0000-0000-4000-8000-0000000000b2
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{ "status": "LOCKED" }
+
+### Mở khoá tài khoản locked
+PATCH {{base}}/admin/users/5eed0000-0000-4000-8000-0000000000b3
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{ "status": "ACTIVE" }
+
+### Audit log
+GET {{base}}/admin/audit-logs?limit=20
+Authorization: Bearer {{adminToken}}
+
+### User thường gọi API admin -> 403
+GET {{base}}/admin/stats
+Authorization: Bearer {{token}}
