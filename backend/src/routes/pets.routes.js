@@ -1,0 +1,11 @@
+const router = require("express").Router();
+const authRequired = require("../middlewares/auth");
+const pets = require("../controllers/pets.controller");
+router.use(authRequired);
+router.get("/", pets.listPets);
+router.post("/", pets.createPet);
+router.get("/:id/together-days", pets.getTogetherDays);
+router.get("/:id", pets.getPet);
+router.patch("/:id", pets.updatePet);
+router.delete("/:id", pets.deletePet);
+module.exports = router;
