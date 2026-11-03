@@ -1,5 +1,1 @@
-import React from "react";
-import JournalScreen from "../src/components/JournalScreen";
-export default function Screen() {
-  return <JournalScreen mode="timeline" />;
-}
+export { default } from "../src/features/timeline/TimelineScreen";

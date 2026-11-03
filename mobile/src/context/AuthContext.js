@@ -1,11 +1,4 @@
-import React, {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { api, tokenStore, refreshStore } from "../services/api";
 
 const AuthContext = createContext(null);
@@ -13,6 +6,10 @@ const AuthContext = createContext(null);
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [ready, setReady] = useState(false);
+  /** "new" sau khi đăng ký, "back" sau khi đăng nhập – dùng cho lời chào & hoạt ảnh vào Trang chủ. */
+  const [welcome, setWelcome] = useState(null);
+  const clearWelcome = useCallback(() => setWelcome(null), []);
+
   const refreshUser = useCallback(async () => {
     const r = await api("/auth/me");
     setUser(r.user);
@@ -41,13 +38,10 @@ export function AuthProvider({ children }) {
   }, []);
 
   const signIn = useCallback(async (email, password) => {
-    const response = await api("/auth/login", {
-      method: "POST",
-      body: { email, password },
-      token: null,
-    });
+    const response = await api("/auth/login", { method: "POST", body: { email, password }, token: null });
     await tokenStore.set(response.token);
     await refreshStore.set(response.refreshToken);
+    setWelcome("back");
     setUser(response.user);
   }, []);
 
@@ -59,29 +53,26 @@ export function AuthProvider({ children }) {
     });
     await tokenStore.set(response.token);
     await refreshStore.set(response.refreshToken);
+    setWelcome("new");
     setUser(response.user);
   }, []);
 
   const signOut = useCallback(async () => {
     try {
       const refreshToken = await refreshStore.get();
-      if (refreshToken)
-        await api("/auth/logout", {
-          method: "POST",
-          token: null,
-          body: { refreshToken },
-        });
+      if (refreshToken) await api("/auth/logout", { method: "POST", token: null, body: { refreshToken } });
     } catch {
       /* Clear this device even when the network is unavailable. */
     }
     await refreshStore.clear();
     await tokenStore.clear();
+    setWelcome(null);
     setUser(null);
   }, []);
 
   const value = useMemo(
-    () => ({ user, ready, signIn, signUp, signOut, refreshUser }),
-    [user, ready, signIn, signUp, signOut, refreshUser],
+    () => ({ user, ready, signIn, signUp, signOut, refreshUser, welcome, clearWelcome }),
+    [user, ready, signIn, signUp, signOut, refreshUser, welcome, clearWelcome],
   );
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

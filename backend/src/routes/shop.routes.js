@@ -10,6 +10,7 @@ router.get("/checkout-key", (req, res) =>
 );
 router.get("/categories", catalog.listCategories);
 router.get("/products", catalog.listProducts);
+router.post("/products/search", catalog.listProducts);
 router.get("/products/:id", catalog.getProduct);
 router.get("/cart", cart.getCart);
 router.put("/cart/:id", cart.updateCart);

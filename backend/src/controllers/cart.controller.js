@@ -5,7 +5,7 @@ exports.getCart = wrap(async (req, res) => {
   const pool = await getPool();
   const items = (
     await pool.request().input("user", sql.UniqueIdentifier, req.userId)
-      .query(`SELECT p.Id AS id,p.Name AS name,p.Price AS price,p.Stock AS stock,p.IsActive AS isActive,c.Quantity AS quantity
+      .query(`SELECT p.Id AS id,p.Name AS name,p.Price AS price,p.Stock AS stock,p.IsActive AS isActive,p.Category AS category,p.ImageUrl AS imageUrl,c.Quantity AS quantity
     FROM dbo.CartItems c JOIN dbo.Products p ON p.Id=c.ProductId WHERE c.UserId=@user ORDER BY p.Name`)
   ).recordset;
   res.json({

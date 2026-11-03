@@ -17,24 +17,27 @@ exports.listCategories = wrap(async (req, res) => {
 });
 
 exports.listProducts = wrap(async (req, res) => {
-  const { offset, limit, page } = pagination(req.query);
+  const filters = req.method === "POST" ? (req.body || {}) : req.query;
+  const { offset, limit, page } = pagination(filters);
   const pool = await getPool();
   const result = await pool
     .request()
     .input(
       "search",
       sql.NVarChar(160),
-      text(req.query.search || "", 160, false),
+      text(filters.search || "", 160, false),
     )
     .input(
       "category",
       sql.NVarChar(80),
-      text(req.query.category || "", 80, false),
+      text(filters.category || "", 80, false),
     )
     .input("offset", sql.Int, offset)
     .input("limit", sql.Int, limit)
     .query(`SELECT ${productColumns} FROM dbo.Products WHERE IsActive=1
-      AND (@search='' OR CHARINDEX(@search,Name)>0) AND (@category='' OR Category=@category)
+      AND (@search='' OR CHARINDEX(@search COLLATE Vietnamese_CI_AI,Name COLLATE Vietnamese_CI_AI)>0
+        OR CHARINDEX(@search COLLATE Vietnamese_CI_AI,Category COLLATE Vietnamese_CI_AI)>0)
+      AND (@category='' OR Category=@category)
       ORDER BY Name,Id OFFSET @offset ROWS FETCH NEXT @limit ROWS ONLY`);
   res.json({
     items: result.recordset,

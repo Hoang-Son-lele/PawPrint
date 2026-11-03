@@ -1,10 +1,25 @@
-import React, { useState } from "react";
-import { Image, View, Text } from "react-native";
-export default function Avatar({uri,label="?",size=64}) {
-  const [failed,setFailed] = useState(false);
-  React.useEffect(()=>setFailed(false),[uri]);
-  const style = {width:size,height:size,borderRadius:size/2};
-  return uri && !failed
-    ? <Image source={{uri}} style={style} resizeMode="cover" onError={()=>setFailed(true)} accessibilityLabel={`Ảnh đại diện ${label}`} />
-    : <View style={[style,{backgroundColor:"#E9EEF6",alignItems:"center",justifyContent:"center"}]}><Text style={{fontSize:size*0.36,color:"#283454",fontWeight:"700"}}>{label.trim().slice(0,2).toUpperCase() || "?"}</Text></View>;
+import React from "react";
+import SmartImage from "./SmartImage";
+
+/** Ảnh đại diện tròn; khi chưa có ảnh hiển thị chữ cái đầu. */
+export default function Avatar({ uri, label = "?", size = 64, ring = false }) {
+  const initials =
+    String(label || "?")
+      .trim()
+      .split(/\s+/)
+      .slice(-2)
+      .map((w) => w[0])
+      .join("")
+      .slice(0, 2) || "?";
+  return (
+    <SmartImage
+      uri={uri}
+      label={`Ảnh đại diện ${label}`}
+      fallback={initials}
+      style={[
+        { width: size, height: size, borderRadius: size / 2 },
+        ring && { borderWidth: 3, borderColor: "#FFFFFF" },
+      ]}
+    />
+  );
 }

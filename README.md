@@ -6,7 +6,7 @@
 
 ## Tech stack
 - **Backend:** Node.js >= 22, Express 5, JavaScript (CommonJS), `mssql`, JWT, bcryptjs.
-- **Mobile:** React Native + Expo **SDK 57**, JavaScript (không dùng TypeScript), Expo Router, expo-secure-store.
+- **Mobile:** React Native + Expo **SDK 58**, JavaScript (không dùng TypeScript), Expo Router, expo-secure-store.
 - **Database:** Microsoft SQL Server, SQL Server Authentication, file script SSMS.
 
 > **Tình trạng:** Starter code, chưa phải bản MVP hoàn chỉnh. Đã viết code cho đăng ký, đăng nhập, JWT, `/auth/me`, Pet Profile CRUD, Together Days, giao diện đăng nhập/đăng ký/danh sách/tạo/xem/xóa mềm thú cưng. Các bảng nền của Moments, Media, Care Diary, Milestones và Notifications đã có trong schema **nhưng chưa có API/UI**. Refresh token, forgot-password, upload ảnh, AI, cloud storage, push notification và thanh toán chưa làm.
@@ -97,7 +97,7 @@ Test tự động hiện kiểm tra tính ngày đồng hành, date format và U
 - `DB_TRUST_SERVER_CERTIFICATE=true` / `DB_ENCRYPT=false` chỉ dùng để hỗ trợ SQL Server local. Production phải kiểm tra TLS và chứng chỉ hợp lệ.
 - Chỉ dùng `SQL Authentication` trong starter, không dùng Windows Integrated Authentication qua package `mssql` mặc định.
 - JWT 7 ngày là cấu hình tiện phát triển. Khi triển khai thật cần access/refresh token riêng, revoke token, reset password, xác minh email, giới hạn login, logging có kiểm soát, backup, quản lý secrets và chuẩn HTTPS.
-- `Expo SDK 57` được chọn để phù hợp Expo Go ở thời điểm tạo starter (21/10/2026), xem thông báo nâng cấp khi Expo Go chuyển sang SDK 58. Không cài React Native khác phiên bản tương thích Expo SDK 57.
+- `Expo SDK 58` tương thích với React 19.3.0 và React Native 0.88.1. Không cài React Native khác phiên bản tương thích Expo SDK 58.
 - `mobile/.env` sử dụng biến **EXPO_PUBLIC_** nên giá trị sẽ nằm trong ứng dụng; **không để password, JWT secret hay API key vào đây**.
 - API `DELETE /pets/:id` sử dụng **soft delete** và mobile có hộp xác nhận. Chính sách xóa hẳn và dữ liệu liên quan sẽ chốt sau.
 

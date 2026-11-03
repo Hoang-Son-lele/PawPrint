@@ -1,141 +1,92 @@
+/**
+ * Lớp tương thích cho các màn hình quản trị cũ: giữ nguyên API (Page, Title, Caption,
+ * TextField, PrimaryButton, ErrorText, Card) nhưng dùng hệ thống thiết kế mới.
+ */
 import React from "react";
-import {
-  ActivityIndicator,
-  Pressable,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { palette, typography } from "../theme";
+import { colors, fonts, radius, shadow } from "../theme";
+import FormField from "./FormField";
+import Button from "./Button";
+import Icon from "./Icon";
 
 export function Page({ children, style }) {
   return (
-    <SafeAreaView
-      style={[styles.page, style]}
-      edges={["bottom", "left", "right"]}
-    >
+    <SafeAreaView style={[styles.page, style]} edges={["bottom", "left", "right"]}>
       {children}
     </SafeAreaView>
   );
 }
-export function Title({ children }) {
-  return <Text style={styles.title}>{children}</Text>;
-}
-export function Caption({ children }) {
-  return <Text style={styles.caption}>{children}</Text>;
-}
-export function TextField({ label, ...props }) {
+export function Title({ children, style }) {
   return (
-    <View style={styles.field}>
-      <Text style={styles.label}>{label}</Text>
-      <TextInput
-        style={styles.input}
-        placeholderTextColor={palette.muted}
-        autoCapitalize="none"
-        {...props}
-      />
-    </View>
+    <Text accessibilityRole="header" style={[styles.title, style]}>
+      {children}
+    </Text>
   );
 }
-export function PrimaryButton({
-  title,
-  onPress,
-  loading = false,
-  disabled = false,
-  variant = "primary",
-}) {
-  const isSecondary = variant === "secondary";
+export function Caption({ children, style }) {
+  return <Text style={[styles.caption, style]}>{children}</Text>;
+}
+export function TextField(props) {
+  return <FormField {...props} />;
+}
+export function PrimaryButton({ title, onPress, loading = false, disabled = false, variant = "primary", icon, style }) {
   return (
-    <Pressable
+    <Button
+      title={title}
       onPress={onPress}
-      disabled={disabled || loading}
-      style={({ pressed }) => [
-        styles.button,
-        isSecondary && styles.buttonSecondary,
-        (pressed || disabled || loading) && { opacity: 0.7 },
-      ]}
-    >
-      {loading ? (
-        <ActivityIndicator color={isSecondary ? palette.primary : "#FFF"} />
-      ) : (
-        <Text
-          style={[styles.buttonText, isSecondary && styles.buttonTextSecondary]}
-        >
-          {title}
-        </Text>
-      )}
-    </Pressable>
+      loading={loading}
+      disabled={disabled}
+      icon={icon}
+      variant={variant === "secondary" ? "secondary" : variant}
+      style={[{ marginTop: 10 }, style]}
+      full
+    />
   );
 }
 export function ErrorText({ error }) {
-  return error ? <Text style={styles.error}>{error}</Text> : null;
+  if (!error) return null;
+  return (
+    <View style={styles.error} accessibilityRole="alert" accessibilityLiveRegion="polite">
+      <Icon name="alert-circle" size={18} color={colors.danger} />
+      <Text style={styles.errorText}>{error}</Text>
+    </View>
+  );
+}
+export function SuccessText({ message }) {
+  if (!message) return null;
+  return (
+    <View style={[styles.error, { backgroundColor: colors.successSoft }]} accessibilityRole="alert" accessibilityLiveRegion="polite">
+      <Icon name="checkmark-circle" size={18} color={colors.success} />
+      <Text style={[styles.errorText, { color: colors.success }]}>{message}</Text>
+    </View>
+  );
 }
 export function Card({ children, style }) {
   return <View style={[styles.card, style]}>{children}</View>;
 }
+
 const styles = StyleSheet.create({
-  page: { flex: 1, backgroundColor: palette.background, paddingHorizontal: 20 },
-  title: {
-    ...typography.heading,
-    color: palette.ink,
-    fontSize: 27,
-    lineHeight: 36,
-    marginBottom: 10,
+  page: { flex: 1, backgroundColor: colors.background, paddingHorizontal: 18 },
+  title: { fontFamily: fonts.heavy, fontSize: 22, lineHeight: 30, color: colors.ink, marginBottom: 6 },
+  caption: { fontFamily: fonts.medium, fontSize: 14, lineHeight: 21, color: colors.inkSoft },
+  error: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 8,
+    backgroundColor: colors.dangerSoft,
+    borderRadius: radius.sm,
+    padding: 12,
+    marginVertical: 8,
   },
-  caption: {
-    ...typography.regular,
-    color: palette.muted,
-    fontSize: 14,
-    lineHeight: 23,
-  },
-  field: { marginVertical: 7 },
-  label: {
-    ...typography.heading,
-    color: palette.ink,
-    marginBottom: 8,
-    fontSize: 14,
-    lineHeight: 22,
-  },
-  input: {
-    backgroundColor: palette.surface,
-    borderColor: palette.border,
-    borderWidth: 1,
-    ...typography.regular,
-    borderRadius: 14,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    fontSize: 16,
-    lineHeight: 24,
-    color: palette.ink,
-  },
-  button: {
-    backgroundColor: palette.primary,
-    minHeight: 49,
-    borderRadius: 12,
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: 12,
-    paddingHorizontal: 12,
-  },
-  buttonSecondary: { backgroundColor: palette.subtle },
-  buttonText: {
-    ...typography.heading,
-    color: "#FFF",
-    fontSize: 15,
-    lineHeight: 23,
-    textAlign: "center",
-    paddingVertical: 10,
-  },
-  buttonTextSecondary: { color: palette.primaryDark },
-  error: { color: palette.error, marginVertical: 8, fontSize: 14 },
+  errorText: { flex: 1, fontFamily: fonts.bold, fontSize: 14, lineHeight: 20, color: colors.danger },
   card: {
     padding: 18,
-    borderRadius: 16,
+    borderRadius: radius.lg,
     borderWidth: 1,
-    borderColor: palette.border,
-    backgroundColor: palette.surface,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
     marginVertical: 8,
+    ...shadow.soft,
   },
 });

@@ -32,7 +32,7 @@ export default function TrafficPanel() {
         {!data.daily.length && <Caption>Chưa có lượt truy cập được ghi nhận.</Caption>}
         {data.daily.map(row => <View key={row.day} style={{marginVertical:8}}>
           <Caption>{row.day} · {row.views} lượt xem · {row.visitors} khách</Caption>
-          <View style={{height:8,borderRadius:4,backgroundColor:"#24594B",width:`${Math.max(2,100*row.views/Math.max(...data.daily.map(d=>d.views)))}%`}} />
+          <View style={{height:8,borderRadius:4,backgroundColor:"#073A83",width:`${Math.max(2,100*row.views/Math.max(...data.daily.map(d=>d.views)))}%`}} />
         </View>)}
       </Card>
       <Card><Title>Sản phẩm được xem nhiều</Title>
